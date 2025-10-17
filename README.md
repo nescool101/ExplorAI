@@ -1,177 +1,238 @@
-AI Travel Planner App, then break it into clear development tasks so you can start coding or designing (in Cursor, Warp, or similar).
+# ExplorAI - AI-Powered Travel Planning
 
-We’ll organize it as a complete roadmap, with 4 main phases:
-1️⃣ Concept & Architecture
-2️⃣ Backend (Spring Boot + Spring AI)
-3️⃣ Frontend (React + Vite) ASTRO/vite
-4️⃣ AI + Integrations (LLM + APIs + RAG)
-5️⃣ Deployment & Differentiation
+ExplorAI is an intelligent travel planning application that uses artificial intelligence to create personalized, detailed itineraries for travelers. The project consists of a Spring Boot backend with AI integration and an Astro frontend with React components.
 
-🧭 1️⃣ Concept & Core Goals
-App name (tentative): TripMind AI (or whatever you choose later)
-Main goal: Help users create smart, realistic, and personal travel itineraries — better than Gemini by focusing on personalization, privacy, and live data.
+## 🏗️ Project Structure
 
-🧠 Value Proposition
-Gemini / Google	TripMind AI advantage
-Broad & generic answers	Deep niche personalization (families, food, kids, budgets)
-No persistent memory	Learns from user’s past trips/preferences
-No transparency	Shows reasons, prices, weather, time logic clearly
-Limited booking integration	Real flight validation + cost breakdown
-Cloud-only	Optional offline / downloadable itineraries
-⚙️ 2️⃣ Tech Architecture Overview
-Frontend: React + Vite + Tailwind + React Query
-Backend: Spring Boot 3.3 + Spring AI
-Database (optional): PostgreSQL (pgvector) or JSON file for local prototype
-AI Models: DeepSeek / Vicuna (free) + OpenRouter API
-Integrations:
+```
+ExplorAI/
+├── backend/                 # Spring Boot API with Spring AI
+│   ├── src/main/java/      # Java source code
+│   ├── build.gradle.kts    # Gradle build configuration
+│   └── Dockerfile          # Docker configuration
+├── frontend/               # Astro + React + TypeScript frontend
+│   ├── src/
+│   │   ├── components/     # React components
+│   │   ├── layouts/        # Astro layouts
+│   │   └── pages/          # Astro pages
+│   ├── astro.config.mjs    # Astro configuration
+│   └── package.json        # Frontend dependencies
+├── .gitignore             # Git ignore rules
+└── README.md              # This file
+```
 
-Google Maps / Mapbox
+## 🚀 Quick Start
 
-Skyscanner or Amadeus (flights)
+### Prerequisites
 
-OpenWeather (weather)
+- **Java 17+** (for backend)
+- **Node.js 18+** (for frontend)
+- **Docker** (optional, for containerized deployment)
 
-Optional: Wikipedia / Wikivoyage (local attractions)
+### Backend Setup (Spring Boot)
 
-Deployment:
+1. **Navigate to backend directory:**
+   ```bash
+   cd backend
+   ```
 
-Backend → Fly.io (Dockerized Spring Boot app)
+2. **Set up environment variables:**
+   ```bash
+   cp env.example .env
+   # Edit .env with your API keys
+   ```
 
-Frontend → GitHub Pages (static build from Vite)
+3. **Run the application:**
+   ```bash
+   ./gradlew bootRun
+   ```
 
-🧩 3️⃣ Backend Tasks (Spring Boot + Spring AI)
-🧰 Setup
- Create Spring Boot 3.3+ project with spring-ai, spring-web, spring-boot-starter-json.
+   The API will be available at `http://localhost:8080`
 
- Add .env or Fly.io secrets for OPENAI_API_KEY or DEEPSEEK_API_KEY.
+### Frontend Setup (Astro + React)
 
- Create endpoints:
+1. **Navigate to frontend directory:**
+   ```bash
+   cd frontend
+   ```
 
-/api/generate-itinerary
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-/api/validate-flight
+3. **Start development server:**
+   ```bash
+   npm run dev
+   ```
 
-/api/save-trip
+   The frontend will be available at `http://localhost:4321`
 
-/api/user/preferences
+## 🛠️ Development
 
-🔥 Core Logic
- Use ChatClient from Spring AI to connect to DeepSeek / OpenAI.
+### Backend Development
 
- Implement basic prompt templates:
+The backend is built with:
+- **Spring Boot 3.3+** - Main framework
+- **Spring AI** - AI integration
+- **Gradle** - Build tool
+- **Java 17+** - Programming language
 
-"Create a {duration}-day itinerary for {destinations}, optimized for {preferences}."
- Integrate live APIs:
+**Key endpoints:**
+- `POST /api/generate-itinerary` - Generate AI-powered itineraries
+- `GET /api/validate-flight` - Validate flight information
+- `POST /api/save-trip` - Save user trips
+- `GET /api/user/preferences` - Get user preferences
 
-Flights → Skyscanner / Amadeus REST API
+### Frontend Development
 
-Weather → OpenWeatherMap
+The frontend is built with:
+- **Astro** - Static site generator
+- **React** - UI components
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
 
- Add lightweight RAG (JSON → embeddings → Spring AI in-memory store).
+**Key components:**
+- `Hero` - Landing page hero section
+- `FeatureCard` - Feature showcase cards
+- `ItineraryForm` - Trip planning form
+- `Layout` - Main page layout
 
- Create /validate-flight endpoint to confirm flight availability.
+## 🔧 Configuration
 
-💾 Persistence (optional)
- Start with saving user trips as JSON files (/data/trips/userId.json).
+### Environment Variables
 
- Later: replace with PostgreSQL + pgvector for recommendations and RAG.
+Create a `.env` file in the backend directory:
 
-🎨 4️⃣ Frontend Tasks (React + Vite)
-⚙️ Setup
- npm create vite@latest tripmind-ai --template react
+```env
+# AI Configuration
+OPENAI_API_KEY=your_openai_api_key
+DEEPSEEK_API_KEY=your_deepseek_api_key
 
- Install:
+# Database (optional)
+DATABASE_URL=your_database_url
 
-npm i tailwindcss react-query axios shadcn-ui
- Configure Tailwind + Shadcn UI
+# External APIs
+SKYSCANNER_API_KEY=your_skyscanner_key
+OPENWEATHER_API_KEY=your_openweather_key
+```
 
-🧱 Core UI Components
- HomePage – user inputs trip details (destination, dates, preferences)
+### Frontend Configuration
 
- ResultsPage – displays generated itinerary cards
+The frontend uses Astro's built-in configuration. Key settings in `astro.config.mjs`:
+- React integration enabled
+- Tailwind CSS configured
+- TypeScript support
 
- TripCard – each day’s summary + map + weather
+## 🚀 Deployment
 
- FlightValidation – validates selected flights
+### Backend Deployment (Fly.io)
 
- SavedTrips – shows user’s past trips
+1. **Install Fly CLI:**
+   ```bash
+   curl -L https://fly.io/install.sh | sh
+   ```
 
-🔗 API Integration
- Create Axios instance pointing to Fly.io backend.
+2. **Deploy:**
+   ```bash
+   cd backend
+   fly launch
+   fly secrets set OPENAI_API_KEY=your_key
+   fly deploy
+   ```
 
- Handle /generate-itinerary call and render result dynamically.
+### Frontend Deployment (Static Hosting)
 
- Use React Query to manage loading, caching, and errors.
+1. **Build the project:**
+   ```bash
+   cd frontend
+   npm run build
+   ```
 
-💡 Bonus Features
- Add map preview (Mapbox / Google Maps)
+2. **Deploy to your preferred static hosting:**
+   - GitHub Pages
+   - Netlify
+   - Vercel
+   - AWS S3 + CloudFront
 
- Add “Download PDF” (offline itinerary)
+## 🧠 AI Integration
 
- Add “Edit plan” (let users swap activities)
+ExplorAI uses multiple AI models and services:
 
-🧠 5️⃣ AI + Integrations
-🗣️ Models & LLMs
- Start with DeepSeek (via OpenRouter) → free tier.
+- **OpenAI GPT** - Primary language model
+- **DeepSeek** - Alternative model via OpenRouter
+- **Spring AI** - Java AI integration framework
 
- Optionally use Vicuna / Llama locally via Ollama.
+The AI generates personalized itineraries based on:
+- Destination preferences
+- Travel dates and duration
+- Budget constraints
+- Interest categories
+- Traveler count
 
- Create backend config to switch between models (depending on plan type).
+## 🌍 External Integrations
 
-🔍 RAG (Retrieval-Augmented Generation)
- Collect travel data (climate, attractions) as .json.
+- **Skyscanner/Amadeus** - Flight validation and pricing
+- **OpenWeatherMap** - Weather information
+- **Google Maps/Mapbox** - Location and routing data
+- **Wikipedia/Wikivoyage** - Local attraction information
 
- Use Spring AI to embed & search in-memory.
+## 📝 API Documentation
 
- Later: migrate to Postgres pgvector for persistent retrieval.
+### Generate Itinerary
 
-🌍 External APIs
-Purpose	API	Notes
-Flight validation	Skyscanner / Amadeus	For real-time validation
-Weather info	OpenWeatherMap	Free tier available
-Maps / routing	Mapbox / Google Maps	For route display
-Local data	Wikipedia / Wikivoyage	Free and open
-🚀 6️⃣ Deployment Tasks
-Backend (Fly.io)
- Add Dockerfile for Spring Boot app
+```http
+POST /api/generate-itinerary
+Content-Type: application/json
 
- fly launch → set up Fly.io app
+{
+  "destination": "Tokyo, Japan",
+  "startDate": "2024-06-01",
+  "endDate": "2024-06-07",
+  "travelers": 2,
+  "budget": "mid-range",
+  "interests": ["culture", "food", "history"]
+}
+```
 
- fly secrets set OPENAI_API_KEY=...
+### Validate Flight
 
- Connect PostgreSQL or skip for now
+```http
+GET /api/validate-flight?origin=NYC&destination=LAX&date=2024-06-01
+```
 
-Frontend (GitHub Pages)
- npm run build
+## 🤝 Contributing
 
- Push /dist folder to gh-pages branch
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
- Configure custom domain (optional)
+## 📄 License
 
-🌟 7️⃣ Competitive Edge Features
-These will make TripMind AI stand out against Gemini and TravelPal:
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
- Personalization memory – remembers previous user trips.
+## 🆘 Support
 
- Live validation – flights + weather + real maps.
+If you encounter any issues or have questions:
 
- Offline export – downloadable trip PDF.
+1. Check the [Issues](https://github.com/your-username/ExplorAI/issues) page
+2. Create a new issue with detailed information
+3. Contact the development team
 
- Voice chat (optional) – integrate with browser speech-to-text.
+## 🗺️ Roadmap
 
- Family mode / budget mode – preconfigured templates.
+- [ ] User authentication and profiles
+- [ ] Trip sharing and collaboration
+- [ ] Mobile app (React Native)
+- [ ] Offline itinerary downloads
+- [ ] Voice interaction
+- [ ] Real-time trip updates
+- [ ] Community features
+- [ ] Advanced AI personalization
 
- Local community mode – user-curated “hidden gems”.
+---
 
-🧭 8️⃣ Next Steps (for you in Cursor)
-Step	Description	Output
-1	Create new folder tripmind-ai with backend + frontend subfolders	Base structure
-2	Initialize Spring Boot app (spring init)	Backend skeleton
-3	Create Vite React project	Frontend
-4	Start with /generate-itinerary endpoint	Working AI backend
-5	Connect frontend form → backend	Basic E2E
-6	Add flight validation + weather data	Real-world logic
-7	Deploy backend (Fly.io) + frontend (GitHub Pages)	MVP online
-8	Add personalization, offline mode, voice, etc.	Product differentiation
-Would you like me to generate the backend folder structure with sample Spring Boot files (controllers, services, config, Dockerfile) next — so you can copy it into Cursor and start coding right away?
+**Built with ❤️ using Spring Boot, Astro, React, and AI**
 

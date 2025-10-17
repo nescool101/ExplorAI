@@ -1,9 +1,12 @@
 package com.tripmind.ai.controller;
 
+import com.tripmind.ai.dto.*;
 import com.tripmind.ai.service.ItineraryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Controlador REST para la generación de itinerarios de viaje
@@ -24,8 +27,8 @@ public class ItineraryController {
     @PostMapping("/generate-itinerary")
     public ResponseEntity<?> generateItinerary(@RequestBody ItineraryRequest request) {
         try {
-            // TODO: Implementar lógica de generación de itinerario con Spring AI
-            return ResponseEntity.ok("Itinerario generado para: " + request.getDestination());
+            ItineraryResponse response = itineraryService.generateMockItinerary(request);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error al generar itinerario: " + e.getMessage());
         }
@@ -81,7 +84,9 @@ public class ItineraryController {
         private String destination;
         private String startDate;
         private String endDate;
-        private String preferences;
+        private int travelers;
+        private String budget;
+        private List<String> interests;
 
         // Getters y setters
         public String getDestination() { return destination; }
@@ -90,8 +95,12 @@ public class ItineraryController {
         public void setStartDate(String startDate) { this.startDate = startDate; }
         public String getEndDate() { return endDate; }
         public void setEndDate(String endDate) { this.endDate = endDate; }
-        public String getPreferences() { return preferences; }
-        public void setPreferences(String preferences) { this.preferences = preferences; }
+        public int getTravelers() { return travelers; }
+        public void setTravelers(int travelers) { this.travelers = travelers; }
+        public String getBudget() { return budget; }
+        public void setBudget(String budget) { this.budget = budget; }
+        public List<String> getInterests() { return interests; }
+        public void setInterests(List<String> interests) { this.interests = interests; }
     }
 
     public static class FlightRequest {
