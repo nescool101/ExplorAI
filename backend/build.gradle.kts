@@ -27,8 +27,9 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter")
-    implementation("org.springframework.ai:spring-ai-spring-boot-starter")
+    // Spring AI dependencies commented out for now - using mock data
+    // implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter")
+    // implementation("org.springframework.ai:spring-ai-spring-boot-starter")
     
     // Database (commented for now, ready for Supabase)
     // implementation("org.springframework.boot:spring-boot-starter-data-jpa")

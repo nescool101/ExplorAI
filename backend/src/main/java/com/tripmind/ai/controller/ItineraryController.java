@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controlador REST para la generación de itinerarios de viaje
@@ -32,6 +33,15 @@ public class ItineraryController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error al generar itinerario: " + e.getMessage());
         }
+    }
+
+    /**
+     * Verificación de salud de la API
+     * @return Estado de la aplicación
+     */
+    @GetMapping("/health")
+    public ResponseEntity<?> health() {
+        return ResponseEntity.ok(Map.of("status", "UP"));
     }
 
     /**
