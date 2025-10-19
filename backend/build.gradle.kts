@@ -22,14 +22,14 @@ configurations {
 repositories {
     mavenCentral()
     maven { url = uri("https://repo.spring.io/milestone") }
+    maven { url = uri("https://repo.spring.io/snapshot") }
 }
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    // Spring AI dependencies for OpenRouter integration
-    implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter")
-    implementation("org.springframework.ai:spring-ai-spring-boot-starter")
+    // Using direct HTTP client instead of Spring AI for now
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     
     // Database (commented for now, ready for Supabase)
     // implementation("org.springframework.boot:spring-boot-starter-data-jpa")

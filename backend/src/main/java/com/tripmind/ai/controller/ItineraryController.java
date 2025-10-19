@@ -2,7 +2,7 @@ package com.tripmind.ai.controller;
 
 import com.tripmind.ai.dto.*;
 import com.tripmind.ai.service.ItineraryService;
-import com.tripmind.ai.service.AiItineraryService;
+import com.tripmind.ai.service.OpenRouterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +21,7 @@ public class ItineraryController {
     private ItineraryService itineraryService;
 
     @Autowired
-    private AiItineraryService aiItineraryService;
+    private OpenRouterService openRouterService;
 
     /**
      * Genera un itinerario de viaje personalizado
@@ -32,7 +32,7 @@ public class ItineraryController {
     public ResponseEntity<?> generateItinerary(@RequestBody ItineraryRequest request) {
         try {
             // Try AI generation first, fallback to mock if it fails
-            ItineraryResponse response = aiItineraryService.generateAiItinerary(request);
+            ItineraryResponse response = openRouterService.generateItinerary(request);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             // Fallback to mock data if AI fails

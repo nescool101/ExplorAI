@@ -2,10 +2,9 @@ package com.tripmind.ai.service;
 
 import com.tripmind.ai.controller.ItineraryController.ItineraryRequest;
 import com.tripmind.ai.dto.*;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -15,44 +14,43 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
- * Servicio de IA para la generación de itinerarios usando OpenRouter con DeepSeek-R1
+ * Servicio para integración directa con OpenRouter API usando DeepSeek-R1
  */
 @Service
-public class AiItineraryService {
+public class OpenRouterService {
 
-    @Autowired
-    private ChatModel chatModel;
+    @Value("${OPENROUTER_API_KEY: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}")
+    private String apiKey;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Value("${OPENROUTER_MODEL:deepseek/deepseek-r1}")
+    private String model;
 
-    private final ChatClient chatClient;
+    private final WebClient webClient;
+    private final ObjectMapper objectMapper;
 
-    public AiItineraryService(ChatModel chatModel) {
-        this.chatClient = ChatClient.builder(chatModel).build();
+    public OpenRouterService(WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
+        this.webClient = webClientBuilder
+            .baseUrl("https://openrouter.ai/api/v1")
+            .defaultHeader("Authorization", "Bearer " + apiKey)
+            .defaultHeader("Content-Type", "application/json")
+            .build();
+        this.objectMapper = objectMapper;
     }
 
     /**
-     * Genera un itinerario personalizado usando IA
-     * @param request Datos del viaje
-     * @return Itinerario generado por IA
+     * Genera un itinerario usando OpenRouter API
      */
-    public ItineraryResponse generateAiItinerary(ItineraryRequest request) {
+    public ItineraryResponse generateItinerary(ItineraryRequest request) {
         try {
-            String prompt = buildItineraryPrompt(request);
-            String aiResponse = chatClient.prompt()
-                .user(prompt)
-                .call()
-                .content();
-
-            return parseAiResponse(aiResponse, request);
+            String prompt = buildPrompt(request);
+            String response = callOpenRouter(prompt);
+            return parseResponse(response, request);
         } catch (Exception e) {
-            // Fallback to mock data if AI fails
-            return generateFallbackItinerary(request);
+            throw new RuntimeException("Error calling OpenRouter API: " + e.getMessage(), e);
         }
     }
 
-    private String buildItineraryPrompt(ItineraryRequest request) {
+    private String buildPrompt(ItineraryRequest request) {
         int duration = calculateDuration(request.getStartDate(), request.getEndDate());
         String interests = String.join(", ", request.getInterests());
         
@@ -61,7 +59,7 @@ public class AiItineraryService {
             
             Interests: %s
             
-            Please provide a JSON response with the following structure:
+            Please provide a JSON response with this exact structure:
             {
               "destination": "%s",
               "startDate": "%s",
@@ -73,68 +71,67 @@ public class AiItineraryService {
                 {
                   "dayNumber": 1,
                   "date": "%s",
-                  "title": "Day 1 Title",
+                  "title": "Day 1: Arrival and First Impressions",
                   "morningActivities": [
                     {
-                      "name": "Activity Name",
-                      "description": "Detailed description",
+                      "name": "Airport Transfer",
+                      "description": "Transfer from airport to hotel",
                       "time": "09:00",
                       "duration": "2 hours",
-                      "location": "Location name",
-                      "category": "Culture",
-                      "cost": 25.0,
+                      "location": "Airport to Hotel",
+                      "category": "Transportation",
+                      "cost": 50.0,
                       "currency": "USD",
-                      "emoji": "🏛️",
+                      "emoji": "🚗",
                       "bookingUrl": "",
-                      "tips": "Helpful tips"
+                      "tips": "Allow extra time for customs"
                     }
                   ],
                   "afternoonActivities": [],
                   "eveningActivities": [],
                   "restaurants": [
                     {
-                      "name": "Restaurant Name",
+                      "name": "Local Restaurant",
                       "cuisine": "Local Cuisine",
-                      "description": "Restaurant description",
-                      "address": "Full address",
-                      "phone": "+1234567890",
+                      "description": "Authentic local dishes",
+                      "address": "123 Main Street",
+                      "phone": "+1-234-567-8900",
                       "priceRange": "$$",
                       "rating": 4.5,
                       "mealType": "Lunch",
-                      "bookingUrl": "https://example.com",
-                      "tips": "Reservation tips"
+                      "bookingUrl": "",
+                      "tips": "Reservations recommended"
                     }
                   ],
-                  "summary": "Day summary",
-                  "estimatedCost": 150.0
+                  "summary": "First day summary",
+                  "estimatedCost": 100.0
                 }
               ],
               "accommodation": {
                 "name": "Hotel Name",
                 "type": "Hotel",
-                "description": "Hotel description",
-                "address": "Hotel address",
-                "phone": "+1234567890",
-                "rating": 4.8,
+                "description": "Comfortable hotel",
+                "address": "456 Hotel Street",
+                "phone": "+1-234-567-8901",
+                "rating": 4.5,
                 "priceRange": "$$",
                 "nightlyRate": 150.0,
                 "currency": "USD",
-                "amenities": "WiFi, Pool, Gym",
-                "bookingUrl": "https://example.com",
+                "amenities": "WiFi, Pool",
+                "bookingUrl": "",
                 "checkIn": "15:00",
                 "checkOut": "11:00"
               },
-              "totalCost": 1200.0,
+              "totalCost": 800.0,
               "currency": "USD",
               "travelTips": [
-                "Tip 1",
-                "Tip 2",
-                "Tip 3"
+                "Book accommodations in advance",
+                "Download offline maps",
+                "Carry local currency"
               ]
             }
             
-            Make the itinerary realistic, detailed, and personalized based on the interests and budget.
-            Include specific locations, times, costs, and practical tips.
+            Make it realistic and detailed for %s.
             """, 
             request.getDestination(),
             request.getStartDate(),
@@ -148,33 +145,45 @@ public class AiItineraryService {
             request.getEndDate(),
             request.getTravelers(),
             request.getBudget(),
-            objectMapper.writeValueAsString(request.getInterests()),
-            request.getStartDate()
+            request.getInterests().toString(),
+            request.getStartDate(),
+            request.getDestination()
         );
     }
 
-    private ItineraryResponse parseAiResponse(String aiResponse, ItineraryRequest request) {
+    private String callOpenRouter(String prompt) {
+        Map<String, Object> requestBody = Map.of(
+            "model", model,
+            "messages", List.of(
+                Map.of("role", "user", "content", prompt)
+            ),
+            "max_tokens", 4000,
+            "temperature", 0.7
+        );
+
+        return webClient.post()
+            .uri("/chat/completions")
+            .bodyValue(requestBody)
+            .retrieve()
+            .bodyToMono(String.class)
+            .block();
+    }
+
+    private ItineraryResponse parseResponse(String response, ItineraryRequest request) {
         try {
-            // Clean the response to extract JSON
-            String jsonResponse = extractJsonFromResponse(aiResponse);
-            JsonNode root = objectMapper.readTree(jsonResponse);
+            JsonNode root = objectMapper.readTree(response);
+            String content = root.get("choices").get(0).get("message").get("content").asText();
+            
+            // Extract JSON from the response
+            String jsonContent = extractJsonFromContent(content);
+            JsonNode itineraryData = objectMapper.readTree(jsonContent);
 
-            // Parse days
-            List<DayItinerary> days = new ArrayList<>();
-            JsonNode daysNode = root.get("days");
-            if (daysNode != null && daysNode.isArray()) {
-                for (JsonNode dayNode : daysNode) {
-                    days.add(parseDayItinerary(dayNode));
-                }
-            }
-
-            // Parse accommodation
-            Accommodation accommodation = parseAccommodation(root.get("accommodation"));
-
-            // Parse other fields
-            double totalCost = root.get("totalCost").asDouble();
-            String currency = root.get("currency").asText("USD");
-            List<String> travelTips = parseTravelTips(root.get("travelTips"));
+            // Parse the itinerary
+            List<DayItinerary> days = parseDays(itineraryData.get("days"));
+            Accommodation accommodation = parseAccommodation(itineraryData.get("accommodation"));
+            double totalCost = itineraryData.get("totalCost").asDouble();
+            String currency = itineraryData.get("currency").asText("USD");
+            List<String> travelTips = parseTravelTips(itineraryData.get("travelTips"));
 
             return new ItineraryResponse(
                 request.getDestination(),
@@ -190,23 +199,32 @@ public class AiItineraryService {
                 travelTips
             );
         } catch (Exception e) {
-            throw new RuntimeException("Failed to parse AI response", e);
+            throw new RuntimeException("Error parsing AI response: " + e.getMessage(), e);
         }
     }
 
-    private String extractJsonFromResponse(String response) {
-        // Find JSON content between ```json and ``` or just look for { ... }
-        int start = response.indexOf("{");
-        int end = response.lastIndexOf("}") + 1;
+    private String extractJsonFromContent(String content) {
+        int start = content.indexOf("{");
+        int end = content.lastIndexOf("}") + 1;
         
         if (start != -1 && end > start) {
-            return response.substring(start, end);
+            return content.substring(start, end);
         }
         
-        return response;
+        return content;
     }
 
-    private DayItinerary parseDayItinerary(JsonNode dayNode) {
+    private List<DayItinerary> parseDays(JsonNode daysNode) {
+        List<DayItinerary> days = new ArrayList<>();
+        if (daysNode != null && daysNode.isArray()) {
+            for (JsonNode dayNode : daysNode) {
+                days.add(parseDay(dayNode));
+            }
+        }
+        return days;
+    }
+
+    private DayItinerary parseDay(JsonNode dayNode) {
         int dayNumber = dayNode.get("dayNumber").asInt();
         String date = dayNode.get("date").asText();
         String title = dayNode.get("title").asText();
@@ -271,7 +289,11 @@ public class AiItineraryService {
 
     private Accommodation parseAccommodation(JsonNode accommodationNode) {
         if (accommodationNode == null) {
-            return generateDefaultAccommodation();
+            return new Accommodation(
+                "Default Hotel", "Hotel", "Comfortable accommodation",
+                "123 Main Street", "+1-234-567-8900", 4.0, "$$",
+                100.0, "USD", "WiFi, Pool", "", "15:00", "11:00"
+            );
         }
         
         return new Accommodation(
@@ -299,30 +321,6 @@ public class AiItineraryService {
             }
         }
         return tips;
-    }
-
-    private ItineraryResponse generateFallbackItinerary(ItineraryRequest request) {
-        // Fallback to mock data if AI fails
-        ItineraryService mockService = new ItineraryService();
-        return mockService.generateMockItinerary(request);
-    }
-
-    private Accommodation generateDefaultAccommodation() {
-        return new Accommodation(
-            "Default Hotel",
-            "Hotel",
-            "Comfortable accommodation",
-            "123 Main Street",
-            "+1-234-567-8900",
-            4.0,
-            "$$",
-            100.0,
-            "USD",
-            "WiFi, Pool",
-            "",
-            "15:00",
-            "11:00"
-        );
     }
 
     private int calculateDuration(String startDate, String endDate) {
