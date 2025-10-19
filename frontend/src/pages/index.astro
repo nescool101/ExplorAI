@@ -1,0 +1,127 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Hero } from '../components/Hero';
+import { FeatureCard } from '../components/FeatureCard';
+import { ItineraryModal } from '../components/ItineraryModal';
+---
+
+<Layout title="ExplorAI - AI-Powered Travel Planning">
+  <div id="app">
+    <Hero 
+      title="Plan Your Perfect Trip with AI"
+      subtitle="Discover amazing destinations, create personalized itineraries, and make unforgettable memories with the power of artificial intelligence."
+      ctaText="Start Planning"
+      onCtaClick={() => {
+        // Fallback action - could scroll to features or do nothing
+        console.log('CTA clicked');
+      }}
+      onPromptClick={(prompt) => {
+        window.handlePromptClick(prompt);
+      }}
+      client:load
+    />
+
+    <div class="py-16">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Why Choose ExplorAI?</h2>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          Our AI-powered platform creates personalized travel experiences tailored to your preferences, budget, and interests.
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <FeatureCard 
+          icon="🤖"
+          title="AI-Powered Planning"
+          description="Advanced algorithms analyze your preferences to create the perfect itinerary for your trip."
+        />
+        <FeatureCard 
+          icon="💰"
+          title="Budget Optimization"
+          description="Get the most value for your money with smart budget allocation and cost-saving recommendations."
+        />
+        <FeatureCard 
+          icon="🎯"
+          title="Personalized Experience"
+          description="Every recommendation is tailored to your interests, travel style, and specific needs."
+        />
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal will be rendered here by React -->
+  <div id="modal-root"></div>
+</Layout>
+
+<script>
+  import { createRoot } from 'react-dom/client';
+  import React from 'react';
+  import { ItineraryModal } from '../components/ItineraryModal';
+  import type { ItineraryResponse } from '../services/api';
+
+  // Global state for modal
+  let modalRoot: any = null;
+  let currentItinerary: ItineraryResponse | null = null;
+  let isModalOpen = false;
+
+  // Initialize modal root
+  function initModal() {
+    const modalElement = document.getElementById('modal-root');
+    if (modalElement && !modalRoot) {
+      modalRoot = createRoot(modalElement);
+    }
+  }
+
+  // Show itinerary modal
+  window.showItineraryModal = function(itinerary: ItineraryResponse) {
+    currentItinerary = itinerary;
+    isModalOpen = true;
+    renderModal();
+  };
+
+  // Close modal
+  window.closeItineraryModal = function() {
+    isModalOpen = false;
+    currentItinerary = null;
+    renderModal();
+  };
+
+  // Render modal
+  function renderModal() {
+    if (!modalRoot) return;
+    
+    if (isModalOpen && currentItinerary) {
+      modalRoot.render(
+        React.createElement(ItineraryModal, {
+          isOpen: true,
+          onClose: window.closeItineraryModal,
+          itinerary: currentItinerary
+        })
+      );
+    } else {
+      modalRoot.render(null);
+    }
+  }
+
+  // Handle prompt clicks from Hero
+  window.handlePromptClick = function(prompt: string) {
+    console.log('Prompt clicked:', prompt);
+    // The Hero component now handles prompt clicks internally
+    // This function is kept for compatibility but not actively used
+  };
+
+  // Initialize when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    initModal();
+    console.log('ExplorAI frontend loaded');
+  });
+
+  // Also listen for custom events dispatched from React components
+  window.addEventListener('show-itinerary', (e: any) => {
+    if (!e?.detail) return;
+    if (typeof window.showItineraryModal === 'function') {
+      window.showItineraryModal(e.detail);
+    }
+  });
+</script>

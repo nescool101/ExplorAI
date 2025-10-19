@@ -1,0 +1,58 @@
+---
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "ExplorAI - AI-powered travel planning" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-gray-50">
+    <header class="bg-white shadow-sm border-b">
+      <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center">
+            <a href="/" class="text-xl font-bold text-gray-900">
+              ExplorAI
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <a href="/" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+              Home
+            </a>
+            <a href="/about" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+              About
+            </a>
+          </div>
+        </div>
+      </nav>
+    </header>
+    
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <slot />
+    </main>
+    
+    <footer class="bg-white border-t mt-auto">
+      <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+        <p class="text-center text-sm text-gray-500">
+          © 2024 ExplorAI. All rights reserved.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  @import '../styles/global.css';
+</style>
+
