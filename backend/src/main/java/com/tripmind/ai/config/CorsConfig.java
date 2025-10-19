@@ -18,8 +18,8 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Permitir origen del frontend (Astro en desarrollo)
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:4321", "http://localhost:3000"));
+        // Permitir cualquier origen en desarrollo (sin credenciales)
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         
         // Métodos HTTP permitidos
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -27,8 +27,8 @@ public class CorsConfig {
         // Headers permitidos
         configuration.setAllowedHeaders(Arrays.asList("*"));
         
-        // Permitir credenciales
-        configuration.setAllowCredentials(true);
+        // No permitir credenciales cuando se usa wildcard de origen
+        configuration.setAllowCredentials(false);
         
         // Configurar para todas las rutas
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
