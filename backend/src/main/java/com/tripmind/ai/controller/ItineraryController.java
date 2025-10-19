@@ -2,6 +2,7 @@ package com.tripmind.ai.controller;
 
 import com.tripmind.ai.dto.*;
 import com.tripmind.ai.service.ItineraryService;
+import com.tripmind.ai.service.AiItineraryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,9 @@ public class ItineraryController {
     @Autowired
     private ItineraryService itineraryService;
 
+    @Autowired
+    private AiItineraryService aiItineraryService;
+
     /**
      * Genera un itinerario de viaje personalizado
      * @param request Datos del viaje (destino, fechas, preferencias)
@@ -27,10 +31,17 @@ public class ItineraryController {
     @PostMapping("/generate-itinerary")
     public ResponseEntity<?> generateItinerary(@RequestBody ItineraryRequest request) {
         try {
-            ItineraryResponse response = itineraryService.generateMockItinerary(request);
+            // Try AI generation first, fallback to mock if it fails
+            ItineraryResponse response = aiItineraryService.generateAiItinerary(request);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error al generar itinerario: " + e.getMessage());
+            // Fallback to mock data if AI fails
+            try {
+                ItineraryResponse response = itineraryService.generateMockItinerary(request);
+                return ResponseEntity.ok(response);
+            } catch (Exception fallbackException) {
+                return ResponseEntity.badRequest().body("Error al generar itinerario: " + e.getMessage());
+            }
         }
     }
 
